@@ -68,8 +68,8 @@ def phase_from_garmin(step: dict):
             "distance": (int(step["durationValue"])
                          if step["durationType"] == "DISTANCE"
                          else None),
-            "name": f"{pace(step['targetValueLow'])}__"
-                    f"{pace(step['targetValue'])}__"
+            "name": f"{pace(step['targetValueLow'])}_"
+                    f"{pace(step['targetValue'])}_"
                     f"{pace(step['targetValueHigh'])}",
             "phaseType": "PHASE"
         }
