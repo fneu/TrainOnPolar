@@ -40,7 +40,8 @@ def next_run(session):
             date = dateparser.parse(
                 day.find(".title", first=True).text
             ).replace(hour=23, minute=59, second=59, microsecond=999999)
-            logger.debug(f"Url to next workout on {date}: {url}")
+            logger.info(f"Found next workout on {date.strftime('%Y-%m-%d')}")
+            logger.debug(f"Url to next workout: {url}")
             return url, date
     logger.error("Cannot find next workout in calendar view.")
     exit(1)
