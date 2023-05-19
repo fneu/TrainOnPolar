@@ -19,5 +19,4 @@ def login(config):
         logger.error("Cannot connect to TrainAsOne: Login failed.")
         exit(1)
     logger.debug("Login to TrainAsOne succeeded.")
-    logger.warning("Login to TrainAsOne succeeded.")
     return session

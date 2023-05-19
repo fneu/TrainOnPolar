@@ -1,5 +1,4 @@
 [DEFAULT]
-default_date = today
 log_level = INFO
 
 [trainasone]
