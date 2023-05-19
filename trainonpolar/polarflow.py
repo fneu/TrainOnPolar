@@ -21,7 +21,7 @@ def login(config):
     if not r.url.startswith('https://flow.polar.com/diary'):
         logger.error("Cannot connect to Polar Flow: Login failed.")
         exit(1)
-    logger.debug("Login to Polar Flow succeeded.")
+    logger.info("Login to Polar Flow succeeded.")
     return session
 
 

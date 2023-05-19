@@ -19,7 +19,7 @@ def login(config):
     if not r.url.startswith('https://beta.trainasone.com/home'):
         logger.error("Cannot connect to TrainAsOne: Login failed.")
         exit(1)
-    logger.debug("Login to TrainAsOne succeeded.")
+    logger.info("Login to TrainAsOne succeeded.")
     return session
 
 
