@@ -20,3 +20,4 @@ next_run_url, next_run_date = trainasone.next_run(tao_session)
 workout = trainasone.get_workout(tao_session, next_run_url)
 
 phased_target = polarflow.phased_target_from_garmin(workout, next_run_date)
+polarflow.upload(flow_session, phased_target)

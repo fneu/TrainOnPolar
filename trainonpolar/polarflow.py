@@ -28,6 +28,7 @@ def login(config):
 def phased_target_from_garmin(workout: dict, date: datetime.datetime):
     target = {
         "type": "PHASED",
+        "name": workout["workoutName"],
         "description": "",
         "datetime": date.strftime("%Y-%m-%dT%H:%M"),
         "exerciseTargets": [{
@@ -72,3 +73,13 @@ def phase_from_garmin(step: dict):
                     f"{pace(step['targetValueHigh'])}",
             "phaseType": "PHASE"
         }
+
+
+def upload(session, target):
+    headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0','Accept':'*/*', 'Referrer':'https://flow.polar.com/target?date=2023-05-20','Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest', 'rigin':'https://flow.polar.com', 'Sec-Fetch-Dest':'empty', 'Sec-Fetch-Mode':'cors','Sec-Fetch-Site':'same-origin', 'TE':'trailers', 'Host':'flow.polar.com'}
+    r = session.post("https://flow.polar.com/api/trainingtarget", json=target, headers=headers)
+    if r.status_code != 201:
+        logger.error(f"Failed to upload workout to polar flow: {r.status_code}:\n{r.text}")
+    else:
+        logger.info("Uploaded workout to polar flow:"
+                    f"https://flow.polar.com/target/{r.text}")
