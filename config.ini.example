@@ -1,0 +1,10 @@
+[DEFAULT]
+date = today
+
+[trainasone]
+user = USERNAME
+password = PASSWORD
+
+[polarflow]
+user = USERNAME
+password = PASSWORD
