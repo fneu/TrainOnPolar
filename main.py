@@ -1,8 +1,6 @@
-import argparse
 import configparser
 import logging
 
-import dateparser
 
 from trainonpolar import trainasone
 
@@ -16,4 +14,5 @@ logger = logging.getLogger("trainonpolar")
 logger.setLevel(config["DEFAULT"]["log_level"])
 
 tao_session = trainasone.login(config)
-
+next_run_url, next_run_date = trainasone.next_run(tao_session)
+workout = trainasone.get_workout(tao_session, next_run_url)
