@@ -1,10 +1,11 @@
 [DEFAULT]
 default_date = today
+log_level = INFO
 
 [trainasone]
-user = USERNAME
+email = EMAIL
 password = PASSWORD
 
 [polarflow]
-user = USERNAME
+email = EMAIL
 password = PASSWORD
