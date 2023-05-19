@@ -1,5 +1,5 @@
 [DEFAULT]
-date = today
+default_date = today
 
 [trainasone]
 user = USERNAME
