@@ -23,16 +23,26 @@ phased_target = polarflow.phased_target_from_garmin(workout, next_run_date)
 
 conflicting_target = polarflow.check_conflicting_target(flow_session, next_run_date)
 if conflicting_target:
-    if cache.is_unchanged(phased_target, conflicting_target):
-        logger.warning("Did NOT upload phased target. "
-                       "Last uploaded target still exists in polar flow "
-                       "and the TAO workout didn't change since: "
-                       f"https://flow.polar.com/target/{conflicting_target}\n"
-                       "If you changed the phased target in flow, "
-                       "please delete it manually.")
-        exit(1)
+    if cache.is_last_uploaded(conflicting_target):
+        if cache.tao_unchanged(phased_target):
+            logger.warning("Did NOT upload phased target. "
+                           "Last uploaded target still exists in polar flow "
+                           "and the TAO workout didn't change since: "
+                           f"https://flow.polar.com/target/{conflicting_target}\n"
+                           "If you changed the phased target in flow, "
+                           "please delete it manually.")
+            exit(1)
+        elif config.getboolean("polarflow", "allow_deletion_of_training_targets"):
+            polarflow.delete(flow_session, conflicting_target)
+        else:
+            logger.error("The previously uploaded target exists in flow,\n"
+                         "but the TrainAsOne Workout has changed.\n"
+                         "Please delete "
+                         f"https://flow.polar.com/target/{conflicting_target} "
+                         "manually, or allow auto-deletion in config.ini")
+            exit(1)
     else:
-        logger.error("A different but conflicting target exists in flow.\n"
+        logger.error("A unknown conflicting target exists in flow.\n"
                      "Please delete "
                      f"https://flow.polar.com/target/{conflicting_target} "
                      "manually")

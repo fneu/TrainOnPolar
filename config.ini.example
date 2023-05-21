@@ -8,3 +8,4 @@ password = PASSWORD
 [polarflow]
 email = EMAIL
 password = PASSWORD
+allow_deletion_of_training_targets = no

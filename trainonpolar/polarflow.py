@@ -88,6 +88,17 @@ def upload(session, target):
         return r.text
 
 
+def delete(session, id):
+    r = session.delete(
+        f"https://flow.polar.com/training/target/{id}",
+        headers={'X-Requested-With': 'XMLHttpRequest'})
+
+    if r.status_code == 200:
+        logger.warning("Deleted a previously uploaded training target that was scheduled for the same time.")
+    else:
+        logger.warning(f"Failed to delete https://flow.polar.com/target/{id}")
+
+
 def check_conflicting_target(session, date):
     r = session.get(
         f"https://flow.polar.com/training/getCalendarEvents?start={date.strftime('%d.%m.%Y')}&end={(date+datetime.timedelta(days=1)).strftime('%d.%m.%Y')}",
@@ -96,7 +107,6 @@ def check_conflicting_target(session, date):
 
     if r.status_code != 200:
         logger.warning(f"Failed to check for polar flow workouts on: {date}")
-        logger.error(r.text)
         return None
 
     for item in r.json():
