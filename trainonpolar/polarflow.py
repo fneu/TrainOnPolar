@@ -3,7 +3,7 @@ import logging
 
 import requests_html
 
-from trainonpolar.formatting import pace, duration, word_filter
+from trainonpolar.formatting import pace, duration, simple_title
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def login(config):
 def phased_target_from_garmin(workout: dict, date: datetime.datetime):
     target = {
         "type": "PHASED",
-        "name": word_filter(workout["workoutName"]),
+        "name": simple_title(workout["workoutName"]),
         "description": "",
         "datetime": date.strftime("%Y-%m-%dT%H:%M"),
         "exerciseTargets": [{

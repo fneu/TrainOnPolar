@@ -8,7 +8,7 @@ def duration(seconds):
     return f"{int(seconds // 3600):02d}:{int(seconds % 3600 // 60):02d}:{int(seconds % 60):02d}"
 
 
-def word_filter(text):
+def simple_title(text):
     words = []
     for word in text.split(" "):
         if word.endswith("k") or word.endswith("min") or word.isalpha():
