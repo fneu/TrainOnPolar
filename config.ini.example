@@ -9,3 +9,11 @@ password = PASSWORD
 email = EMAIL
 password = PASSWORD
 allow_deletion_of_training_targets = no
+
+[zones]
+change_zones = no
+measurement_unit = METRIC
+speed_view_mode = PACE
+mas_estimated = no
+mas = 03:25
+

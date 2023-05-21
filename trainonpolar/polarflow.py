@@ -116,3 +116,75 @@ def check_conflicting_target(session, date):
                          f"https://flow.polar.com/target/{item['ListItemId']}")
             return item['ListItemId']
     return None
+
+
+def find_running_profile(session):
+    r = session.get("https://flow.polar.com/settings/sports")
+    sports = r.html.find(".sportProfile-item")
+    for sport in sports:
+        if sport.attrs["data-sport-id"] == "1":  # running
+            logger.debug(f"running sport profile has id {sport.attrs['data-profile-id']}")
+            return sport.attrs["data-profile-id"]
+    logger.warning("Could not find running sport profile")
+    return None
+
+
+def set_zones(session, config, lower_bounds):
+    assert len(lower_bounds) == 5
+
+    r = session.post(
+        "https://flow.polar.com/settings/sports/save",
+        json={
+            "sports": {
+                find_running_profile(session): [
+                    {
+                        "name": "SpeedSettings",
+                        "settings": [
+                            {
+                                "name": "measurementUnit",
+                                "value": config['zones']['measurement_unit']
+                            },
+                            {
+                                "name": "speedViewMode",
+                                "value": config['zones']['speed_view_mode']
+                            },
+                            {
+                                "name": "masEstimated",
+                                "value": config.getboolean('zones', 'mas_estimated')
+                            },
+                            {
+                                "name": "mas",
+                                "value": config['zones']['mas']
+                            },
+                            {
+                                "name": "speedZoneType",
+                                "value": "FREE"
+                            },
+                            {
+                                "name": "freeSpeedZone1Min",
+                                "value": str(lower_bounds[0])
+                            },
+                            {
+                                "name": "freeSpeedZone2Min",
+                                "value": str(lower_bounds[1])
+                            },
+                            {
+                                "name": "freeSpeedZone3Min",
+                                "value": str(lower_bounds[2])
+                            },
+                            {
+                                "name": "freeSpeedZone4Min",
+                                "value": str(lower_bounds[3])
+                            },
+                            {
+                                "name": "freeSpeedZone5Min",
+                                "value": str(lower_bounds[4])
+                            },
+                        ]
+                    }
+                ]
+            }
+        },
+        headers={'X-Requested-With': 'XMLHttpRequest'})
+    logger.info(f"Zone change return code: {r.status_code}")
+    logger.info(f"Zone change return message: {r.text}")
