@@ -80,6 +80,8 @@ def upload(session, target):
         headers={'X-Requested-With': 'XMLHttpRequest'})
     if r.status_code != 201:
         logger.error(f"Failed to upload workout to polar flow: {r.status_code}:\n{r.text}")
+        return None
     else:
         logger.info("Uploaded workout to polar flow:"
                     f"https://flow.polar.com/target/{r.text}")
+        return r.text
