@@ -2,7 +2,7 @@ import configparser
 import logging
 
 
-from trainonpolar import trainasone, polarflow, cache
+from trainonpolar import trainasone, polarflow, cache, zonecalc
 
 # read login details and default data from config.ini
 config = configparser.ConfigParser()
@@ -18,6 +18,9 @@ flow_session = polarflow.login(config)
 
 next_run_url, next_run_date = trainasone.next_run(tao_session)
 workout = trainasone.get_workout(tao_session, next_run_url)
+
+zones_lower_bounds = zonecalc.lower_kph_bounds(workout)
+polarflow.set_zones(flow_session, config, zones_lower_bounds)
 
 phased_target = polarflow.phased_target_from_garmin(workout, next_run_date)
 
