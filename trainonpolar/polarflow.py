@@ -26,7 +26,7 @@ def login(config):
     return session
 
 
-def phased_target_from_garmin(workout: dict, date: datetime.datetime):
+def phased_target_from_garmin(workout: dict, date: datetime.datetime, zones_lower_bounds):
     target = {
         "type": "PHASED",
         "name": simple_title(workout["workoutName"]),
@@ -39,26 +39,28 @@ def phased_target_from_garmin(workout: dict, date: datetime.datetime):
             "duration": None,
             "index": 0,
             "sportId": 1,  # running
-            "phases": [phase_from_garmin(step) for step in workout["steps"]]
+            "phases": [phase_from_garmin(step, zones_lower_bounds) for step in workout["steps"]]
         }]
     }
     logger.debug(f"Converted workout to polar flow json format: {target}")
     return target
 
 
-def phase_from_garmin(step: dict):
+def phase_from_garmin(step: dict, zones_lower_bounds):
     if step["type"] == "WorkoutRepeatStep":
         return {
             "phaseType": "REPEAT",
             "repeatCount": int(step["repeatValue"]),
-            "phases": [phase_from_garmin(s) for s in step["steps"]]
+            "phases": [phase_from_garmin(s, zones_lower_bounds) for s in step["steps"]]
         }
     else:
         return {
             "id": None,
-            "lowerZone": 1,
-            "upperZone": 5,
-            "intensityType": "SPEED_ZONES",
+            "lowerZone": get_zone(step, zones_lower_bounds),
+            "upperZone": get_zone(step, zones_lower_bounds),
+            "intensityType": ("SPEED_ZONES"
+                              if step["targetType"] == "SPEED"
+                              else "NONE"),
             "phaseChangeType": "AUTOMATIC",
             "goalType": ("DISTANCE"
                          if step["durationType"] == "DISTANCE"
@@ -74,6 +76,18 @@ def phase_from_garmin(step: dict):
                      else step["description"]),
             "phaseType": "PHASE"
         }
+
+
+def get_zone(step, bounds):
+    if step["targetType"] != "SPEED":
+        return None
+    for i, b in enumerate(bounds):
+        if step['targetValue']*3.6 < b:
+            if i == 0:
+                logger.warning("step target is lower than speed zone 1")
+                return 1
+            return i
+    return 5
 
 
 def upload(session, target):

@@ -22,7 +22,7 @@ workout = trainasone.get_workout(tao_session, next_run_url)
 zones_lower_bounds = zonecalc.lower_kph_bounds(workout)
 polarflow.set_zones(flow_session, config, zones_lower_bounds)
 
-phased_target = polarflow.phased_target_from_garmin(workout, next_run_date)
+phased_target = polarflow.phased_target_from_garmin(workout, next_run_date, zones_lower_bounds)
 
 conflicting_target = polarflow.check_conflicting_target(flow_session, next_run_date)
 if conflicting_target:
