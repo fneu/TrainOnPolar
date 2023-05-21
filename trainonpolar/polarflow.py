@@ -56,8 +56,8 @@ def phase_from_garmin(step: dict, zones_lower_bounds):
     else:
         return {
             "id": None,
-            "lowerZone": get_zone(step, zones_lower_bounds),
-            "upperZone": get_zone(step, zones_lower_bounds),
+            "lowerZone": get_lower_zone(step, zones_lower_bounds),
+            "upperZone": get_upper_zone(step, zones_lower_bounds),
             "intensityType": ("SPEED_ZONES"
                               if step["targetType"] == "SPEED"
                               else "NONE"),
@@ -78,9 +78,25 @@ def phase_from_garmin(step: dict, zones_lower_bounds):
         }
 
 
-def get_zone(step, bounds):
+def get_lower_zone(step, bounds):
     if step["targetType"] != "SPEED":
         return None
+    if not bounds:
+        return 1
+    for i, b in enumerate(bounds):
+        if step['targetValue']*3.6 < b:
+            if i == 0:
+                logger.warning("step target is lower than speed zone 1")
+                return 1
+            return i
+    return 5
+
+
+def get_upper_zone(step, bounds):
+    if step["targetType"] != "SPEED":
+        return None
+    if not bounds:
+        return 5
     for i, b in enumerate(bounds):
         if step['targetValue']*3.6 < b:
             if i == 0:
