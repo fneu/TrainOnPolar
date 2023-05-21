@@ -39,7 +39,7 @@ def next_run(session):
             # polar workout is due in the future
             date = dateparser.parse(
                 day.find(".title", first=True).text
-            ).replace(hour=23, minute=59, second=59, microsecond=999999)
+            ).replace(hour=23, minute=59, second=0, microsecond=0)
             logger.info(f"Found next workout on {date.strftime('%Y-%m-%d')}")
             logger.debug(f"Url to next workout: {url}")
             return url, date

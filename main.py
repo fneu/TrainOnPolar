@@ -21,7 +21,23 @@ workout = trainasone.get_workout(tao_session, next_run_url)
 
 phased_target = polarflow.phased_target_from_garmin(workout, next_run_date)
 
+conflicting_target = polarflow.check_conflicting_target(flow_session, next_run_date)
+if conflicting_target:
+    if cache.is_unchanged(phased_target, conflicting_target):
+        logger.warning("Did NOT upload phased target. "
+                       "Last uploaded target still exists in polar flow "
+                       "and the TAO workout didn't change since: "
+                       f"https://flow.polar.com/target/{conflicting_target}\n"
+                       "If you changed the phased target in flow, "
+                       "please delete it manually.")
+        exit(1)
+    else:
+        logger.error("A different but conflicting target exists in flow.\n"
+                     "Please delete "
+                     f"https://flow.polar.com/target/{conflicting_target} "
+                     "manually")
+        exit(1)
+
 id = polarflow.upload(flow_session, phased_target)
 if id:
-    cache.save(workout, id)
-
+    cache.save(phased_target, id)

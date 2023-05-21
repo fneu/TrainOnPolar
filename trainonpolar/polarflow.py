@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+import dateparser
 import requests_html
 
 from trainonpolar.formatting import pace, duration, simple_title
@@ -85,3 +86,23 @@ def upload(session, target):
         logger.info("Uploaded workout to polar flow:"
                     f"https://flow.polar.com/target/{r.text}")
         return r.text
+
+
+def check_conflicting_target(session, date):
+    r = session.get(
+        f"https://flow.polar.com/training/getCalendarEvents?start={date.strftime('%d.%m.%Y')}&end={(date+datetime.timedelta(days=1)).strftime('%d.%m.%Y')}",
+        headers={'X-Requested-With': 'XMLHttpRequest'}
+    )
+
+    if r.status_code != 200:
+        logger.warning(f"Failed to check for polar flow workouts on: {date}")
+        logger.error(r.text)
+        return None
+
+    for item in r.json():
+        if (item["type"] == "TRAININGTARGET" and
+                dateparser.parse(item["datetime"]) == date):
+            logger.debug("Found conflicting training target: "
+                         f"https://flow.polar.com/target/{item['ListItemId']}")
+            return item['ListItemId']
+    return None
