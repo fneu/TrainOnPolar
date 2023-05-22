@@ -5,6 +5,7 @@ import dateparser
 import requests_html
 
 from trainonpolar.formatting import pace, duration, simple_title
+from trainonpolar.units.speed import KPH
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def login(config):
     return session
 
 
-def phased_target_from_garmin(workout: dict, date: datetime.datetime, zones_lower_bounds):
+def phased_target_from_garmin(workout: dict, date: datetime.datetime, zones_lower_bounds, config):
     target = {
         "type": "PHASED",
         "name": simple_title(workout["workoutName"]),
@@ -39,14 +40,14 @@ def phased_target_from_garmin(workout: dict, date: datetime.datetime, zones_lowe
             "duration": None,
             "index": 0,
             "sportId": 1,  # running
-            "phases": [phase_from_garmin(step, zones_lower_bounds) for step in workout["steps"]]
+            "phases": [phase_from_garmin(step, zones_lower_bounds, config) for step in workout["steps"]]
         }]
     }
     logger.debug(f"Converted workout to polar flow json format: {target}")
     return target
 
 
-def phase_from_garmin(step: dict, zones_lower_bounds):
+def phase_from_garmin(step: dict, zones_lower_bounds, config):
     if step["type"] == "WorkoutRepeatStep":
         return {
             "phaseType": "REPEAT",
@@ -56,8 +57,8 @@ def phase_from_garmin(step: dict, zones_lower_bounds):
     else:
         return {
             "id": None,
-            "lowerZone": get_lower_zone(step, zones_lower_bounds),
-            "upperZone": get_upper_zone(step, zones_lower_bounds),
+            "lowerZone": get_lower_zone(step, zones_lower_bounds, config),
+            "upperZone": get_upper_zone(step, zones_lower_bounds, config),
             "intensityType": ("SPEED_ZONES"
                               if step["targetType"] == "SPEED"
                               else "NONE"),
@@ -78,13 +79,13 @@ def phase_from_garmin(step: dict, zones_lower_bounds):
         }
 
 
-def get_lower_zone(step, bounds):
+def get_lower_zone(step, bounds, config):
     if step["targetType"] != "SPEED":
         return None
     if not bounds:
         return 1
     for i, b in enumerate(bounds):
-        if step['targetValue']*3.6 < b:
+        if (step['targetValue']*3.6 - float(config["zones"]["min_zone_radius_mps"])) < b:
             if i == 0:
                 logger.warning("step target is lower than speed zone 1")
                 return 1
@@ -92,13 +93,13 @@ def get_lower_zone(step, bounds):
     return 5
 
 
-def get_upper_zone(step, bounds):
+def get_upper_zone(step, bounds, config):
     if step["targetType"] != "SPEED":
         return None
     if not bounds:
         return 5
     for i, b in enumerate(bounds):
-        if step['targetValue']*3.6 < b:
+        if (step['targetValue']*3.6 + float(config["zones"]["min_zone_radius_mps"])) < b:
             if i == 0:
                 logger.warning("step target is lower than speed zone 1")
                 return 1
@@ -218,5 +219,7 @@ def set_zones(session, config, lower_bounds):
             }
         },
         headers={'X-Requested-With': 'XMLHttpRequest'})
-    logger.info(f"Zone change return code: {r.status_code}")
-    logger.info(f"Zone change return message: {r.text}")
+    logger.debug(f"Zone change return code: {r.status_code}")
+    logger.debug(f"Zone change return message: {r.text}")
+    if r.status_code == 200:
+        logger.info(f"set zone lower bounds to: {[KPH(b).as_pace() for b in lower_bounds]}")

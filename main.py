@@ -3,6 +3,8 @@ import logging
 
 
 from trainonpolar import trainasone, polarflow, cache, zonecalc
+from trainonpolar.training.zone import calc_zones
+from trainonpolar.units.speed import MPS
 
 # read login details and default data from config.ini
 config = configparser.ConfigParser()
@@ -20,12 +22,14 @@ next_run_url, next_run_date = trainasone.next_run(tao_session)
 workout = trainasone.get_workout(tao_session, next_run_url)
 
 if config.getboolean("zones", "change_zones"):
-    zones_lower_bounds = zonecalc.lower_kph_bounds(workout)
+    speed_targets = zonecalc.unique_speed_targets(workout)
+    zones = calc_zones([MPS(s) for s in speed_targets], config)
+    zones_lower_bounds = [zone.min.as_kph() for zone in zones]
     polarflow.set_zones(flow_session, config, zones_lower_bounds)
 else:
     zones_lower_bounds = None
 
-phased_target = polarflow.phased_target_from_garmin(workout, next_run_date, zones_lower_bounds)
+phased_target = polarflow.phased_target_from_garmin(workout, next_run_date, zones_lower_bounds, config)
 
 conflicting_target = polarflow.check_conflicting_target(flow_session, next_run_date)
 if conflicting_target:

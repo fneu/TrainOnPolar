@@ -18,8 +18,8 @@ class Zone():
 
     @classmethod
     def around(cls, speed: Speed, config: any):
-        return cls(speed - MPS(config["zones"]["min_zone_radius_mps"]),
-                   speed + MPS(config["zones"]["min_zone_radius_mps"]),
+        return cls(speed - MPS(float(config["zones"]["min_zone_radius_mps"])),
+                   speed + MPS(float(config["zones"]["min_zone_radius_mps"])),
                    config)
 
     @classmethod
@@ -35,7 +35,7 @@ class Zone():
     @classmethod
     def beyond(cls, below: 'Zone', config: any):
         return cls(below.max,
-                   below.max + MPS(2 * config["zones"]["min_zone_radius_mps"]),
+                   below.max + MPS(2 * float(config["zones"]["min_zone_radius_mps"])),
                    config)
 
     @classmethod
@@ -153,7 +153,6 @@ def calc_zones(speeds: List[Speed], config):
     # just put them on top
     while len(unique_zones) < 5:
         unique_zones.append(Zone.beyond(unique_zones[-1], config))
-        print(f"added zone on top. unique zones: {unique_zones}")
 
     logger.debug(f"zones after top fillers: {unique_zones}")
 
