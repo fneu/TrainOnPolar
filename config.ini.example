@@ -12,6 +12,7 @@ allow_deletion_of_training_targets = no
 
 [zones]
 change_zones = no
+min_zone_radius_mps = 0.15
 measurement_unit = METRIC
 speed_view_mode = PACE
 mas_estimated = no
