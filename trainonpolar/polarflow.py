@@ -52,7 +52,7 @@ def phase_from_garmin(step: dict, zones_lower_bounds, config):
         return {
             "phaseType": "REPEAT",
             "repeatCount": int(step["repeatValue"]),
-            "phases": [phase_from_garmin(s, zones_lower_bounds) for s in step["steps"]]
+            "phases": [phase_from_garmin(s, zones_lower_bounds, config) for s in step["steps"]]
         }
     else:
         return {
